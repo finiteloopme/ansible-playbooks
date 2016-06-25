@@ -1,0 +1,61 @@
+---
+# file: roles/common/setup/setup-remote-hosts.yml
+- name: configure each remote host properly
+  hosts: "INVENTORY:children"
+  become: true
+  vars:
+    install_user_ssh_key: ""
+    remote_etc_hosts: ""
+
+  tasks:
+    - name: set hostname for "{{ inventory_hostname }}"
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: write a local /etc/hosts temporary file
+      lineinfile:
+        dest: "/tmp/hosts"
+        create: "yes"
+        line: "{{ item.networks.novanetwork_22[0] }}   {{ inventory_hostname }}"
+      with_items: current_inventory.ansible_facts.openstack_servers
+      delegate_to: localhost
+
+    - name: update remote /etc/hosts fact
+      local_action: set_fact remote_etc_hosts="{{ lookup('file', '/tmp/hosts') }}"
+
+    - name: step [1] of clean up /etc/hosts file
+      file:
+        path: "/etc/hosts"
+        state: "absent"
+
+    - name: step [2] of clean up /etc/hosts file
+      file:
+        path: "/etc/hosts"
+        state: "touch"
+
+    - name: update /etc/hosts file
+      blockinfile:
+        dest: "/etc/hosts"
+        state: present
+        block: "{{ remote_etc_hosts }}"
+
+    # Create a new admin user
+    - name: "Create an {{ admin_user }} user"
+      user:
+        name: "{{ admin_user }}"
+        state: present
+        comment: "Admin user"
+        generate_ssh_key: yes
+        group: "wheel"
+
+    - name: "Add the admin user to sudoer's list"
+      lineinfile:
+        dest: "/etc/sudoers"
+        state: present
+        line: "wheel ALL=(ALL) NOPASSWD:ALL"
+
+    # Update the OS
+    - name: update OS packages to latest version
+      yum:
+        name: "*"
+        state: latest

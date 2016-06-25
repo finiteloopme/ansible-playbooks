@@ -1,0 +1,23 @@
+---
+# file: roles/common/bpms/main.yml
+- name: configure each remote host properly
+  hosts: "INVENTORY:bpms-design-servers"
+  become: true
+  vars:
+    jboss_home_dir: "/opt/jboss"
+  var_files:
+    - vars/jboss/bpms.yml
+
+  tasks:
+    - name: download "{{ jboss_artefact }}"
+      get_url:
+        url: "{{ jboss_maven_repo }}{{ jboss_artefact_package }}{{ jboss_artefact }}/{{ jboss_artefact }}-{{ jboss_artefact_version }}.{{ jboss_artefact_archive_type }}"
+        dest: "{{ jboss_home_dir }}/{{ jboss_artefact }}-{{ jboss_artefact_version }}.{{ jboss_artefact_archive_type }}"
+        force: yes
+
+    - name: unarchive "{{ jboss_artefact }}"
+      unarchive:
+        copy: no
+        src: "{{ jboss_home_dir }}/{{ jboss_artefact }}-{{ jboss_artefact_version }}.{{ jboss_artefact_archive_type }}"
+        dest: "{{ jboss_home_dir }}"
+        creates: "{{ jboss_home_dir }}/{{ jboss_artefact }}"

@@ -1,0 +1,20 @@
+---
+# file: roles/common/setup/setup-local-etc-hosts.yml
+- name: ensure the openstack hosts are accessible from localhost
+  hosts: "INVENTORY:children"
+  connection: local
+
+  tasks:
+    - name: add server to the local /etc/hosts file
+      become: yes
+      lineinfile:
+        create: true
+        state: present
+        regexp: "{{ item.networks.novanetwork_22[1] }}*"
+        dest: /etc/hosts
+        line: "{{ item.networks.novanetwork_22[1] }}   {{ inventory_hostname }}"
+      register: write_hosts_file_result
+      until: write_hosts_file_result|success
+      retries: 10
+      delay: 1
+      with_items: current_host_facts.ansible_facts.openstack_servers

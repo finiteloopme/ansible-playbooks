@@ -1,0 +1,64 @@
+---
+- name: "setup openstack environment"
+  hosts: "INVENTORY:children"
+  connection: local
+
+  tasks:
+    # Task to gather facts from OpenStack
+    - name: get remote server facts
+      os_server_facts:
+        server: "{{ inventory_hostname }}"
+      register: original_host_facts
+
+    - name: launch required server(s) on OpenStack
+      os_server:
+        state: present
+        name: "{{ inventory_hostname }}"
+        # rhel 7.2 image
+        # image: fa605955-b2ff-4e6e-b7f2-55702344226d
+        # CentOS-7-1503-x86_64 image
+        image: 75f6b8f7-2f73-4762-baf9-a67a3a1f079c
+        security_groups: klimaye-secgrp
+        key_name: klimaye-macb-air
+        flavor: m1.large
+        api_timeout: 60
+        auto_ip: no
+        meta:
+          hostname: "{{ inventory_hostname }}"
+      register: launch_result
+      until: launch_result|success
+      retries: 5
+      delay: 30
+      when: original_host_facts.ansible_facts.openstack_servers[0].name is undefined
+
+    - name: assign a floating (public) IP
+      os_floating_ip:
+        server: "{{ inventory_hostname }}"
+      register: ip_result
+      until: ((ip_result.floating_ip is defined) and (ip_result.floating_ip.status is defined) and (ip_result.floating_ip.status == "ACTIVE"))
+      retries: 6
+      delay: 20
+
+    - name: get the current remote server facts
+      os_server_facts:
+        server: "{{ inventory_hostname }}"
+      register: current_host_facts
+
+    # - name: add server to the local /etc/hosts file
+    #   become: yes
+    #   lineinfile:
+    #     create: true
+    #     state: present
+    #     regexp: "{{ item.networks.novanetwork_22[1] }}*"
+    #     dest: /etc/hosts
+    #     line: "{{ item.networks.novanetwork_22[1] }}   {{ inventory_hostname }}"
+    #   register: write_hosts_file_result
+    #   until: write_hosts_file_result|success
+    #   retries: 10
+    #   delay: 1
+    #   with_items: current_host_facts.ansible_facts.openstack_servers
+
+  # handlers:
+  #   - include: ../common/handlers/setup-local-etc-hosts.yml
+  #     vars:
+  #         line_to_write: "{{ item.networks.novanetwork_22[1] }}   {{ inventory_hostname }}"

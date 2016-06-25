@@ -1,0 +1,7 @@
+---
+# JBoss artefact config
+jboss_maven_repo: "https://origin-repository.jboss.org/nexus/content/groups/public-jboss/"
+jboss_artefact_package: "org/drools/"
+jboss_artefact: "drools-distribution"
+jboss_artefact_version: "6.4.0.CR1"
+jboss_artefact_archive_type: "zip"

@@ -1,0 +1,12 @@
+---
+# type of deployment. i.e. openstack, aws, google-cloud, etc
+deployment_stack: openstack
+# config used by ansible
+ansible_user: cloud-user
+ansible_sudo: true
+ansible_ssh_private_key_file: /Users/klimaye/.ssh/klimaye-macb-air.pem
+# user created on each host
+admin_user: admin
+# Below var is required else shade component is not available to python
+# Detailed discussion @ https://github.com/ansible/ansible/issues/6345
+ansible_python_interpreter: "/usr/bin/env python"
