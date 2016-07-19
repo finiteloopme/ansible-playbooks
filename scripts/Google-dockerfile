@@ -1,0 +1,18 @@
+FROM centos:7
+MAINTAINER kunal@finiteloop.me
+
+# Ensure that ansible is available for install
+RUN yum -y update
+RUN yum install -y epel-release
+RUN yum install -y wget python python-pip #ansible
+RUN yum install -y gcc python-devel openssl-devel
+
+RUN pip install --upgrade pip
+# Google compute require Apache lib-cloud
+RUN pip install apache-libcloud
+RUN pip install ansible
+RUN pip install --upgrade setuptools
+
+WORKDIR /var/ansible
+
+#CMD ["/usr/bin/ansible-playbook" "-i" "inventory/ose3" "ose.yml"]
