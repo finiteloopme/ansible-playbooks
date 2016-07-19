@@ -1,6 +1,6 @@
 ---
-# type of deployment. i.e. openstack, aws, google-cloud, etc
-deployment_stack: openstack
+# type of deployment. i.e. openstack, aws, google, azure, etc
+deployment_stack: google
 # config used by ansible
 ansible_user: cloud-user
 ansible_sudo: true

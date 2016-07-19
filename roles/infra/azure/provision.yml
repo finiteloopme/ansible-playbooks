@@ -4,7 +4,7 @@
   connection: local
 
   tasks:
-    # Task to gather facts from OpenStack
+    # Gather information related to remote servers
     - name: get remote server facts
       os_server_facts:
         server: "{{ inventory_hostname }}"

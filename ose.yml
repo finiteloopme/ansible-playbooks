@@ -1,0 +1,12 @@
+---
+- name: "main playbook to control environment build"
+  hosts: INVENTORY:children
+  connection: local
+
+  vars_files:
+    - vars/config.yml
+
+  tasks:
+    - include: "roles/infra/{{ deployment_stack }}/provision.yml"
+#- include: "roles/common/setup/setup-local-etc-hosts.yml"
+#- include: "roles/common/setup/setup-remote-hosts.yml"
