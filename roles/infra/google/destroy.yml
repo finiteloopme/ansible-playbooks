@@ -1,20 +1,10 @@
 ---
-- name: Provision server(s)- "{{ play_hosts }}"
+- name: Delete server(s)- "{{ play_hosts }}"
   gce:
     instance_names: "{{ inventory_hostname }}"
-    machine_type: n1-standard-2
-    #"{{ gce_machine_type }}"
-    image: rhel-7-ose-3
-    #"{{ gce_machine_image }}"
+    state: absent
     service_account_email: 292893158312-compute@developer.gserviceaccount.com
     #"{{ gce_service_account_email_address }}"
     credentials_file: /var/ansible/secrets/OpenShift-V3-32605dcc9eb3.json
     #"{{ gce_credentials_file }}"
     project_id: hidden-cat-136223
-    #"{{ gce_project_id }}"
-    state: present
-  register: gce
-
-- name: Print host information
-  debug:
-    var: gce.instance_data[0].public_ip

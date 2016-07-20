@@ -1,0 +1,10 @@
+---
+- name: "main playbook to control environment build"
+  hosts: INVENTORY:children
+  connection: local
+
+  vars_files:
+    - vars/config.yml
+
+  tasks:
+    - include: "roles/infra/{{ deployment_stack }}/destroy.yml"
